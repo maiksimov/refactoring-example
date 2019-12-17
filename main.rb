@@ -1,3 +1,3 @@
 require_relative 'bootstrap/autoloader'
 
-Account.new.console
+Entities::Account.new.console

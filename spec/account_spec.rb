@@ -1,4 +1,4 @@
-RSpec.describe Account do
+RSpec.describe Entities::Account do
   OVERRIDABLE_FILENAME = 'spec/fixtures/account.yml'.freeze
 
   COMMON_PHRASES = {

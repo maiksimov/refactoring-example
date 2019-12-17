@@ -1,3 +1,3 @@
 require 'yaml'
 require 'pry'
-require_relative '../account'
+require_relative '../entities/account'
