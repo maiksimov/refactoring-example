@@ -1,6 +1,3 @@
-require 'yaml'
-require 'pry'
-
 class Account
   attr_accessor :login, :name, :card, :password, :file_path
 
