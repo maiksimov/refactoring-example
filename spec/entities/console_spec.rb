@@ -162,7 +162,7 @@ RSpec.describe Entities::Console do
         accounts = YAML.load_file(OVERRIDABLE_FILENAME)
         expect(accounts).to be_a Array
         expect(accounts.size).to be 1
-        accounts.map { |account| expect(account).to be_a described_class }
+        accounts.map { |account| expect(account).to be_a Entities::Account }
       end
     end
 

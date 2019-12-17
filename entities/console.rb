@@ -32,15 +32,17 @@ module Entities
         age_input
         login_input
         password_input
-        break unless @errors.length != 0
-        @errors.each do |e|
+        @account = Entities::Account.new(name: @name, login: @login, password: @password, age: @age)
+        break if @account.validated?
+
+        @account.errors.each do |e|
           puts e
         end
-        @errors = []
       end
 
       @card = []
-      new_accounts = accounts << self
+
+      new_accounts = accounts << @account
       @current_account = self
       File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
       main_menu
