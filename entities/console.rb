@@ -1,5 +1,5 @@
 module Entities
-  class Account
+  class Console
     attr_accessor :login, :name, :card, :password, :file_path
 
     def initialize
