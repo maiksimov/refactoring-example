@@ -96,10 +96,10 @@ RSpec.describe Entities::Console do
 
   let(:current_subject) { described_class.new }
 
-  describe '#console' do
+  describe '#run' do
     context 'when correct method calling' do
       after do
-        current_subject.console
+        current_subject.run
       end
 
       it 'create account if input is create' do
@@ -123,7 +123,7 @@ RSpec.describe Entities::Console do
         allow(current_subject).to receive_message_chain(:gets, :chomp) { 'test' }
         allow(current_subject).to receive(:exit)
         HELLO_PHRASES.each { |phrase| expect(current_subject).to receive(:puts).with(phrase) }
-        current_subject.console
+        current_subject.run
       end
     end
   end
@@ -321,7 +321,7 @@ RSpec.describe Entities::Console do
 
     it 'with correct outout' do
       expect(current_subject).to receive_message_chain(:gets, :chomp) {}
-      expect(current_subject).to receive(:console)
+      expect(current_subject).to receive(:run)
       expect { current_subject.create_the_first_account }.to output(COMMON_PHRASES[:create_first_account]).to_stdout
     end
 
@@ -331,9 +331,9 @@ RSpec.describe Entities::Console do
       current_subject.create_the_first_account
     end
 
-    it 'calls console if user inputs is not y' do
+    it 'calls run if user inputs is not y' do
       expect(current_subject).to receive_message_chain(:gets, :chomp) { cancel_input }
-      expect(current_subject).to receive(:console)
+      expect(current_subject).to receive(:run)
       current_subject.create_the_first_account
     end
   end
@@ -485,9 +485,9 @@ RSpec.describe Entities::Console do
 
           expect(File.exist?(OVERRIDABLE_FILENAME)).to be true
           file_accounts = YAML.load_file(OVERRIDABLE_FILENAME)
-          expect(file_accounts.first.card.first[:type]).to eq card_info[:type]
-          expect(file_accounts.first.card.first[:balance]).to eq card_info[:balance]
-          expect(file_accounts.first.card.first[:number].length).to be 16
+          expect(file_accounts.first.card.first.type).to eq card_info[:type]
+          expect(file_accounts.first.card.first.balance).to eq card_info[:balance]
+          expect(file_accounts.first.card.first.number.length).to be 16
         end
       end
     end

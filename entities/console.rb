@@ -1,26 +1,21 @@
 module Entities
   class Console
-    attr_accessor :login, :name, :card, :password, :file_path
-
+    attr_accessor :login, :card, :file_path
+    STORAGE_FILE = 'accounts.yml'.freeze
+    
     def initialize
-      @errors = []
-      @file_path = 'accounts.yml'
+      @file_path = STORAGE_FILE
     end
 
-    def console
-        puts 'Hello, we are RubyG bank!'
-        puts '- If you want to create account - press `create`'
-        puts '- If you want to load account - press `load`'
-        puts '- If you want to exit - press `exit`'
+    def run
+      puts 'Hello, we are RubyG bank!'
+      puts '- If you want to create account - press `create`'
+      puts '- If you want to load account - press `load`'
+      puts '- If you want to exit - press `exit`'
 
-      # FIRST SCENARIO. IMPROVEMENT NEEDED
-
-      a = gets.chomp
-
-      if a == 'create'
-        create
-      elsif a == 'load'
-        load
+      case read_input
+      when 'create' then create
+      when 'load' then load
       else
         exit
       end
@@ -28,40 +23,31 @@ module Entities
 
     def create
       loop do
-        name_input
-        age_input
-        login_input
-        password_input
-        @account = Entities::Account.new(name: @name, login: @login, password: @password, age: @age)
-        break if @account.validated?
+        @current_account = Entities::Account.new(name: name_input, age: age_input, login: login_input, password: password_input, accounts: accounts)
+        break if @current_account.validated?
 
-        @account.errors.each do |e|
-          puts e
+        @current_account.errors.each do |error|
+          puts error
         end
       end
-
-      @card = []
-
-      new_accounts = accounts << @account
-      @current_account = self
-      File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+      new_accounts = accounts << @current_account
+      save(new_accounts)
       main_menu
     end
 
     def load
       loop do
-        if !accounts.any?
+        if accounts.empty?
           return create_the_first_account
         end
 
         puts 'Enter your login'
-        login = gets.chomp
+        login = read_input
         puts 'Enter your password'
-        password = gets.chomp
+        password = read_input
 
-        if accounts.map { |a| { login: a.login, password: a.password } }.include?({ login: login, password: password })
-          a = accounts.select { |a| login == a.login }.first
-          @current_account = a
+        if accounts.map { |account| { login: account.login, password: account.password } }.include?({ login: login, password: password })
+          @current_account = accounts.select { |account| login == account.login }.first
           break
         else
           puts 'There is no account with given credentials'
@@ -73,11 +59,9 @@ module Entities
 
     def create_the_first_account
       puts 'There is no active accounts, do you want to be the first?[y/n]'
-      if gets.chomp == 'y'
-        return create
-      else
-        return console
-      end
+      return create if read_input == 'y'
+
+      run
     end
 
     def main_menu
@@ -92,29 +76,19 @@ module Entities
         puts '- send money to another card  - press SM'
         puts '- destroy account - press `DA`'
         puts '- exit from account - press `exit`'
-
-        command = gets.chomp
-
-        if command == 'SC' || command == 'CC' || command == 'DC' || command == 'PM' || command == 'WM' || command == 'SM' || command == 'DA' || command == 'exit'
-          if command == 'SC'
-            show_cards
-          elsif command == 'CC'
-            create_card
-          elsif command == 'DC'
-            destroy_card
-          elsif command == 'PM'
-            put_money
-          elsif command == 'WM'
-            withdraw_money
-          elsif command == 'SM'
-            send_money
-          elsif command == 'DA'
-            destroy_account
-            exit
-          elsif command == 'exit'
-            exit
-            break
-          end
+        case read_input
+        when 'SC' then show_cards
+        when 'CC' then create_card
+        when 'DC' then destroy_card
+        when 'PM' then put_money
+        when 'WM' then withdraw_money
+        when 'SM' then send_money
+        when 'DA'
+          destroy_account
+          exit
+        when 'exit'
+          exit
+          break
         else
           puts "Wrong command. Try again!\n"
         end
@@ -128,43 +102,41 @@ module Entities
         puts '- Capitalist card. 10$ tax on card INCOME. 10% tax on SENDING money from this card. 4$ tax on WITHDRAWING money. For creation this card - press `capitalist`'
         puts '- Virtual card. 1$ tax on card INCOME. 1$ tax on SENDING money from this card. 12% tax on WITHDRAWING money. For creation this card - press `virtual`'
         puts '- For exit - press `exit`'
+        card = case read_input
+               when 'usual'
+                 Card.new(
+                     type: 'usual',
+                     number: 16.times.map{rand(10)}.join,
+                     balance: 50.00
+                 )
+               when 'capitalist'
+                 Card.new(
+                     type: 'capitalist',
+                     number: 16.times.map{rand(10)}.join,
+                     balance: 100.00
+                 )
+               when 'virtual'
+                 Card.new(
+                     type: 'virtual',
+                     number: 16.times.map{rand(10)}.join,
+                     balance: 150.00
+                 )
+               else
+                 puts "Wrong card type. Try again!\n"
+                 next
+               end
 
-        ct = gets.chomp
-        if ct == 'usual' || ct == 'capitalist' || ct == 'virtual'
-          if ct == 'usual'
-            card = {
-              type: 'usual',
-              number: 16.times.map{rand(10)}.join,
-              balance: 50.00
-            }
-          elsif ct == 'capitalist'
-            card = {
-              type: 'capitalist',
-              number: 16.times.map{rand(10)}.join,
-              balance: 100.00
-            }
-          elsif ct == 'virtual'
-            card = {
-              type: 'virtual',
-              number: 16.times.map{rand(10)}.join,
-              balance: 150.00
-            }
+        @current_account.card <<= card
+        new_accounts = []
+        accounts.each do |account|
+          if account.login == @current_account.login
+            new_accounts.push(@current_account)
+          else
+            new_accounts.push(account)
           end
-          cards = @current_account.card << card
-          @current_account.card = cards #important!!!
-          new_accounts = []
-          accounts.each do |ac|
-            if ac.login == @current_account.login
-              new_accounts.push(@current_account)
-            else
-              new_accounts.push(ac)
-            end
-          end
-          File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
-          break
-        else
-          puts "Wrong card type. Try again!\n"
         end
+        save(new_accounts)
+        break
       end
     end
 
@@ -177,22 +149,22 @@ module Entities
             puts "- #{c[:number]}, #{c[:type]}, press #{i + 1}"
           end
           puts "press `exit` to exit\n"
-          answer = gets.chomp
+          answer = read_input
           break if answer == 'exit'
-          if answer&.to_i.to_i <= @current_account.card.length && answer&.to_i.to_i > 0
-            puts "Are you sure you want to delete #{@current_account.card[answer&.to_i.to_i - 1][:number]}?[y/n]"
-            a2 = gets.chomp
+          if answer.to_i <= @current_account.card.length && answer.to_i > 0
+            puts "Are you sure you want to delete #{@current_account.card[answer.to_i - 1][:number]}?[y/n]"
+            a2 = read_input
             if a2 == 'y'
-              @current_account.card.delete_at(answer&.to_i.to_i - 1)
+              @current_account.card.delete_at(answer.to_i - 1)
               new_accounts = []
-              accounts.each do |ac|
-                if ac.login == @current_account.login
+              accounts.each do |account|
+                if account.login == @current_account.login
                   new_accounts.push(@current_account)
                 else
-                  new_accounts.push(ac)
+                  new_accounts.push(account)
                 end
               end
-              File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+              save(new_accounts) #Storing
               break
             else
               return
@@ -219,25 +191,25 @@ module Entities
 
     def withdraw_money
       puts 'Choose the card for withdrawing:'
-      answer, a2, a3 = nil #answers for gets.chomp
+      answer, a2, a3 = nil #answers for read_input
       if @current_account.card.any?
         @current_account.card.each_with_index do |c, i|
           puts "- #{c[:number]}, #{c[:type]}, press #{i + 1}"
         end
         puts "press `exit` to exit\n"
         loop do
-          answer = gets.chomp
+          answer = read_input
           break if answer == 'exit'
-          if answer&.to_i.to_i <= @current_account.card.length && answer&.to_i.to_i > 0
-            current_card = @current_account.card[answer&.to_i.to_i - 1]
+          if answer.to_i <= @current_account.card.length && answer.to_i > 0
+            current_card = @current_account.card[answer.to_i - 1]
             loop do
               puts 'Input the amount of money you want to withdraw'
-              a2 = gets.chomp
-              if a2&.to_i.to_i > 0
-                money_left = current_card[:balance] - a2&.to_i.to_i - withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)
+              a2 = read_input
+              if a2.to_i > 0
+                money_left = current_card[:balance] - a2.to_i - withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2.to_i)
                 if money_left > 0
                   current_card[:balance] = money_left
-                  @current_account.card[answer&.to_i.to_i - 1] = current_card
+                  @current_account.card[answer.to_i - 1] = current_card
                   new_accounts = []
                   accounts.each do |ac|
                     if ac.login == @current_account.login
@@ -246,8 +218,8 @@ module Entities
                       new_accounts.push(ac)
                     end
                   end
-                  File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
-                  puts "Money #{a2&.to_i.to_i} withdrawed from #{current_card[:number]}$. Money left: #{current_card[:balance]}$. Tax: #{withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)}$"
+                  save(new_accounts) #Storing
+                  puts "Money #{a2.to_i} withdrawed from #{current_card[:number]}$. Money left: #{current_card[:balance]}$. Tax: #{withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2.to_i)}$"
                   return
                 else
                   puts "You don't have enough money on card for such operation"
@@ -277,31 +249,31 @@ module Entities
         end
         puts "press `exit` to exit\n"
         loop do
-          answer = gets.chomp
+          answer = read_input
           break if answer == 'exit'
-          if answer&.to_i.to_i <= @current_account.card.length && answer&.to_i.to_i > 0
-            current_card = @current_account.card[answer&.to_i.to_i - 1]
+          if answer.to_i <= @current_account.card.length && answer.to_i > 0
+            current_card = @current_account.card[answer.to_i - 1]
             loop do
               puts 'Input the amount of money you want to put on your card'
-              a2 = gets.chomp
-              if a2&.to_i.to_i > 0
-                if put_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i) >= a2&.to_i.to_i
+              a2 = read_input
+              if a2.to_i > 0
+                if put_tax(current_card[:type], current_card[:balance], current_card[:number], a2.to_i) >= a2.to_i
                   puts 'Your tax is higher than input amount'
                   return
                 else
-                  new_money_amount = current_card[:balance] + a2&.to_i.to_i - put_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)
+                  new_money_amount = current_card[:balance] + a2.to_i - put_tax(current_card[:type], current_card[:balance], current_card[:number], a2.to_i)
                   current_card[:balance] = new_money_amount
-                  @current_account.card[answer&.to_i.to_i - 1] = current_card
+                  @current_account.card[answer.to_i - 1] = current_card
                   new_accounts = []
-                  accounts.each do |ac|
-                    if ac.login == @current_account.login
+                  accounts.each do |account|
+                    if account.login == @current_account.login
                       new_accounts.push(@current_account)
                     else
-                      new_accounts.push(ac)
+                      new_accounts.push(account)
                     end
                   end
-                  File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
-                  puts "Money #{a2&.to_i.to_i} was put on #{current_card[:number]}. Balance: #{current_card[:balance]}. Tax: #{put_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)}"
+                  save(new_accounts) #Storing
+                  puts "Money #{a2.to_i} was put on #{current_card[:number]}. Balance: #{current_card[:balance]}. Tax: #{put_tax(current_card[:type], current_card[:balance], current_card[:number], a2.to_i)}"
                   return
                 end
               else
@@ -327,10 +299,10 @@ module Entities
           puts "- #{c[:number]}, #{c[:type]}, press #{i + 1}"
         end
         puts "press `exit` to exit\n"
-        answer = gets.chomp
+        answer = read_input
         exit if answer == 'exit'
-        if answer&.to_i.to_i <= @current_account.card.length && answer&.to_i.to_i > 0
-          sender_card = @current_account.card[answer&.to_i.to_i - 1]
+        if answer.to_i <= @current_account.card.length && answer.to_i > 0
+          sender_card = @current_account.card[answer.to_i - 1]
         else
           puts 'Choose correct card'
           return
@@ -341,7 +313,7 @@ module Entities
       end
 
       puts 'Enter the recipient card:'
-      a2 = gets.chomp
+      a2 = read_input
       if a2.length > 15 && a2.length < 17
         all_cards = accounts.map(&:card).flatten
         if all_cards.select { |card| card[:number] == a2 }.any?
@@ -357,18 +329,18 @@ module Entities
 
       loop do
         puts 'Input the amount of money you want to withdraw'
-        a3 = gets.chomp
-        if a3&.to_i.to_i > 0
-          sender_balance = sender_card[:balance] - a3&.to_i.to_i - sender_tax(sender_card[:type], sender_card[:balance], sender_card[:number], a3&.to_i.to_i)
-          recipient_balance = recipient_card[:balance] + a3&.to_i.to_i - put_tax(recipient_card[:type], recipient_card[:balance], recipient_card[:number], a3&.to_i.to_i)
+        a3 = read_input
+        if a3.to_i > 0
+          sender_balance = sender_card[:balance] - a3.to_i - sender_tax(sender_card[:type], sender_card[:balance], sender_card[:number], a3.to_i)
+          recipient_balance = recipient_card[:balance] + a3.to_i - put_tax(recipient_card[:type], recipient_card[:balance], recipient_card[:number], a3.to_i)
 
           if sender_balance < 0
             puts "You don't have enough money on card for such operation"
-          elsif put_tax(recipient_card[:type], recipient_card[:balance], recipient_card[:number], a3&.to_i.to_i) >= a3&.to_i.to_i
+          elsif put_tax(recipient_card[:type], recipient_card[:balance], recipient_card[:number], a3.to_i) >= a3.to_i
             puts 'There is no enough money on sender card'
           else
             sender_card[:balance] = sender_balance
-            @current_account.card[answer&.to_i.to_i - 1] = sender_card
+            @current_account.card[answer.to_i - 1] = sender_card
             new_accounts = []
             accounts.each do |ac|
               if ac.login == @current_account.login
@@ -386,9 +358,9 @@ module Entities
                 new_accounts.push(recipient)
               end
             end
-            File.open('accounts.yml', 'w') { |f| f.write new_accounts.to_yaml } #Storing
-            puts "Money #{a3&.to_i.to_i}$ was put on #{sender_card[:number]}. Balance: #{recipient_balance}. Tax: #{put_tax(sender_card[:type], sender_card[:balance], sender_card[:number], a3&.to_i.to_i)}$\n"
-            puts "Money #{a3&.to_i.to_i}$ was put on #{a2}. Balance: #{sender_balance}. Tax: #{sender_tax(sender_card[:type], sender_card[:balance], sender_card[:number], a3&.to_i.to_i)}$\n"
+            File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+            puts "Money #{a3.to_i}$ was put on #{sender_card[:number]}. Balance: #{recipient_balance}. Tax: #{put_tax(sender_card[:type], sender_card[:balance], sender_card[:number], a3.to_i)}$\n"
+            puts "Money #{a3.to_i}$ was put on #{a2}. Balance: #{sender_balance}. Tax: #{sender_tax(sender_card[:type], sender_card[:balance], sender_card[:number], a3.to_i)}$\n"
             break
           end
         else
@@ -399,8 +371,7 @@ module Entities
 
     def destroy_account
       puts 'Are you sure you want to destroy account?[y/n]'
-      a = gets.chomp
-      if a == 'y'
+      if read_input == 'y'
         new_accounts = []
         accounts.each do |ac|
           if ac.login == @current_account.login
@@ -408,69 +379,40 @@ module Entities
             new_accounts.push(ac)
           end
         end
-        File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+
+        save(new_accounts)
       end
     end
 
     private
+    
+    def save(data)
+      File.open(@file_path, 'w') { |f| f.write data.to_yaml }
+    end
 
     def name_input
       puts 'Enter your name'
-      @name = gets.chomp
-      unless @name != '' && @name[0].upcase == @name[0]
-        @errors.push('Your name must not be empty and starts with first upcase letter')
-      end
+      read_input
     end
 
     def login_input
       puts 'Enter your login'
-      @login = gets.chomp
-      if @login == ''
-        @errors.push('Login must present')
-      end
-
-      if @login.length < 4
-        @errors.push('Login must be longer then 4 symbols')
-      end
-
-      if @login.length > 20
-        @errors.push('Login must be shorter then 20 symbols')
-      end
-
-      if accounts.map { |a| a.login }.include? @login
-        @errors.push('Such account is already exists')
-      end
+      read_input
     end
 
     def password_input
       puts 'Enter your password'
-      @password = gets.chomp
-      if @password == ''
-        @errors.push('Password must present')
-      end
-
-      if @password.length < 6
-        @errors.push('Password must be longer then 6 symbols')
-      end
-
-      if @password.length > 30
-        @errors.push('Password must be shorter then 30 symbols')
-      end
+      read_input
     end
 
     def age_input
       puts 'Enter your age'
-      @age = gets.chomp
-      if @age.to_i.is_a?(Integer) && @age.to_i >= 23 && @age.to_i <= 90
-        @age = @age.to_i
-      else
-        @errors.push('Your Age must be greeter then 23 and lower then 90')
-      end
+      read_input
     end
 
     def accounts
-      if File.exists?('accounts.yml')
-        YAML.load_file('accounts.yml')
+      if File.exists?(@file_path)
+        YAML.load_file(@file_path)
       else
         []
       end
@@ -507,6 +449,10 @@ module Entities
         return 1
       end
       0
+    end
+
+    def read_input
+      gets.chomp
     end
   end
 end

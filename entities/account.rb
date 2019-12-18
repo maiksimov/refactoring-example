@@ -1,12 +1,15 @@
 module Entities
   class Account
     attr_reader :login, :name, :password, :age, :errors
+    attr_accessor :card
 
-    def initialize(name:, login:, password:, age:)
+    def initialize(name:, login:, password:, age:, accounts:)
       @name = name
       @login = login
       @password = password
       @age = age
+      @accounts = accounts
+      @card = []
       @errors = []
     end
 
@@ -30,7 +33,7 @@ module Entities
       if @login.length > 20
         @errors.push('Login must be shorter then 20 symbols')
       end
-      if accounts.map { |a| a.login }.include? @login
+      if @accounts.map { |a| a.login }.include? @login
         @errors.push('Such account is already exists')
       end
 

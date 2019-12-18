@@ -1,3 +1,3 @@
 require_relative 'bootstrap/autoloader'
 
-Entities::Console.new.console
+Entities::Console.new.run
