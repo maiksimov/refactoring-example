@@ -1,10 +1,11 @@
 module Entities
   class Console
-    attr_accessor :login, :card, :file_path
+    attr_accessor :login, :card, :file_path, :accounts
     STORAGE_FILE = 'accounts.yml'.freeze
     
     def initialize
       @file_path = STORAGE_FILE
+      load_accounts
     end
 
     def run
@@ -30,8 +31,8 @@ module Entities
           puts error
         end
       end
-      new_accounts = accounts << @current_account
-      save(new_accounts)
+      @accounts << @current_account
+      save
       main_menu
     end
 
@@ -128,14 +129,15 @@ module Entities
 
         @current_account.card <<= card
         new_accounts = []
-        accounts.each do |account|
+        @accounts.each do |account|
           if account.login == @current_account.login
             new_accounts.push(@current_account)
           else
             new_accounts.push(account)
           end
         end
-        save(new_accounts)
+        @accounts = new_accounts
+        save
         break
       end
     end
@@ -157,14 +159,15 @@ module Entities
             if a2 == 'y'
               @current_account.card.delete_at(answer.to_i - 1)
               new_accounts = []
-              accounts.each do |account|
+              @accounts.each do |account|
                 if account.login == @current_account.login
                   new_accounts.push(@current_account)
                 else
                   new_accounts.push(account)
                 end
               end
-              save(new_accounts) #Storing
+              @accounts = new_accounts
+              save
               break
             else
               return
@@ -211,14 +214,15 @@ module Entities
                   current_card[:balance] = money_left
                   @current_account.card[answer.to_i - 1] = current_card
                   new_accounts = []
-                  accounts.each do |ac|
+                  @accounts.each do |ac|
                     if ac.login == @current_account.login
                       new_accounts.push(@current_account)
                     else
                       new_accounts.push(ac)
                     end
                   end
-                  save(new_accounts) #Storing
+                  @accounts = new_accounts
+                  save
                   puts "Money #{a2.to_i} withdrawed from #{current_card[:number]}$. Money left: #{current_card[:balance]}$. Tax: #{withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2.to_i)}$"
                   return
                 else
@@ -265,14 +269,15 @@ module Entities
                   current_card[:balance] = new_money_amount
                   @current_account.card[answer.to_i - 1] = current_card
                   new_accounts = []
-                  accounts.each do |account|
+                  @accounts.each do |account|
                     if account.login == @current_account.login
                       new_accounts.push(@current_account)
                     else
                       new_accounts.push(account)
                     end
                   end
-                  save(new_accounts) #Storing
+                  @accounts = new_accounts
+                  save
                   puts "Money #{a2.to_i} was put on #{current_card[:number]}. Balance: #{current_card[:balance]}. Tax: #{put_tax(current_card[:type], current_card[:balance], current_card[:number], a2.to_i)}"
                   return
                 end
@@ -373,21 +378,21 @@ module Entities
       puts 'Are you sure you want to destroy account?[y/n]'
       if read_input == 'y'
         new_accounts = []
-        accounts.each do |ac|
+        @accounts.each do |ac|
           if ac.login == @current_account.login
           else
             new_accounts.push(ac)
           end
         end
-
-        save(new_accounts)
+        @accounts = new_accounts
+        save
       end
     end
 
     private
     
-    def save(data)
-      File.open(@file_path, 'w') { |f| f.write data.to_yaml }
+    def save
+      File.open(@file_path, 'w') { |f| f.write @accounts.to_yaml }
     end
 
     def name_input
@@ -411,11 +416,11 @@ module Entities
     end
 
     def accounts
-      if File.exists?(@file_path)
-        YAML.load_file(@file_path)
-      else
-        []
-      end
+      File.exists?(@file_path) ? YAML.load_file(@file_path) : []
+    end
+
+    def load_accounts
+      @accounts = File.exists?(@file_path) ? YAML.load_file(@file_path) : []
     end
 
     def withdraw_tax(type, balance, number, amount)
