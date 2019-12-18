@@ -14,14 +14,14 @@ module Entities
       puts '- If you want to exit - press `exit`'
 
       case read_input
-      when 'create' then create
+      when 'create' then create_account
       when 'load' then load
       else
         exit
       end
     end
 
-    def create
+    def create_account
       loop do
         @current_account = Entities::Account.new(name: name_input, age: age_input, login: login_input, password: password_input, accounts: accounts)
         break if @current_account.validated?
@@ -59,7 +59,7 @@ module Entities
 
     def create_the_first_account
       puts 'There is no active accounts, do you want to be the first?[y/n]'
-      return create if read_input == 'y'
+      return create_account if read_input == 'y'
 
       run
     end

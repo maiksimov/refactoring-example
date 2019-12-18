@@ -104,7 +104,7 @@ RSpec.describe Entities::Console do
 
       it 'create account if input is create' do
         allow(current_subject).to receive_message_chain(:gets, :chomp) { 'create' }
-        expect(current_subject).to receive(:create)
+        expect(current_subject).to receive(:create_account)
       end
 
       it 'load account if input is load' do
@@ -152,12 +152,12 @@ RSpec.describe Entities::Console do
         ACCOUNT_VALIDATION_PHRASES.values.map(&:values).each do |phrase|
           expect(current_subject).not_to receive(:puts).with(phrase)
         end
-        current_subject.create
+        current_subject.create_account
       end
 
       it 'write to file Account instance' do
         current_subject.instance_variable_set(:@file_path, OVERRIDABLE_FILENAME)
-        current_subject.create
+        current_subject.create_account
         expect(File.exist?(OVERRIDABLE_FILENAME)).to be true
         accounts = YAML.load_file(OVERRIDABLE_FILENAME)
         expect(accounts).to be_a Array
@@ -181,7 +181,7 @@ RSpec.describe Entities::Console do
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:name][:first_letter] }
           let(:current_inputs) { [error_input, success_age_input, success_login_input, success_password_input] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
       end
 
@@ -192,21 +192,21 @@ RSpec.describe Entities::Console do
           let(:error_input) { '' }
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:login][:present] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
 
         context 'when longer' do
           let(:error_input) { 'E' * 3 }
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:login][:longer] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
 
         context 'when shorter' do
           let(:error_input) { 'E' * 21 }
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:login][:shorter] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
 
         context 'when exists' do
@@ -217,7 +217,7 @@ RSpec.describe Entities::Console do
             allow(current_subject).to receive(:accounts) { [instance_double('Account', login: error_input)] }
           end
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
       end
 
@@ -228,13 +228,13 @@ RSpec.describe Entities::Console do
         context 'with length minimum' do
           let(:error_input) { '22' }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
 
         context 'with length maximum' do
           let(:error_input) { '91' }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
       end
 
@@ -245,21 +245,21 @@ RSpec.describe Entities::Console do
           let(:error_input) { '' }
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:password][:present] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
 
         context 'when longer' do
           let(:error_input) { 'E' * 5 }
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:password][:longer] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
 
         context 'when shorter' do
           let(:error_input) { 'E' * 31 }
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:password][:shorter] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create_account }.to output(/#{error}/).to_stdout }
         end
       end
     end
@@ -327,7 +327,7 @@ RSpec.describe Entities::Console do
 
     it 'calls create if user inputs is y' do
       expect(current_subject).to receive_message_chain(:gets, :chomp) { success_input }
-      expect(current_subject).to receive(:create)
+      expect(current_subject).to receive(:create_account)
       current_subject.create_the_first_account
     end
 
