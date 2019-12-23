@@ -1,0 +1,16 @@
+en:
+  errors:
+    wrong_number: 'Number must be a integer'
+  states:
+    initial: "Welcome\nPlease choose an option\nstart - start game\nrules - read the rules\nstats - check your statistics\nquit - to quit from game"
+  run: "Hello, we are RubyG bank!\n- If you want to create account - press `create`\n- If you want to load account - press `load`\n- If you want to exit - press `exit`"
+  enter_login: 'Enter your login'
+  enter_password: 'Enter your password'
+  no_account: 'There is no account with given credentials'
+  no_active_accounts: 'There is no active accounts, do you want to be the first?[y/n]'
+  menu: "\nWelcome, %{name}\nIf you want to:\n- show all cards - press SC\n- create card - press CC\n- destroy card - press DC\n- put money on card - press PM\n- withdraw money on card - press WM\n- send money to another card  - press SM\n- destroy account - press `DA`\n- exit from account - press `exit`"
+  wrong_command: "Wrong command. Try again!\n"
+  wrong_card_type: "Wrong card type. Try again!\n"
+  delete_question: 'If you want to delete:'
+  select_card: "- %{card_number}, %{card_type}, press %{index}"
+  exit: "press `exit` to exit\n"

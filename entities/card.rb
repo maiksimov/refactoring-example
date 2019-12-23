@@ -1,12 +1,13 @@
 module Entities
   class Card
     attr_reader :errors
-    attr_accessor :type, :number, :balance
+    attr_accessor :type, :number, :balance, :tax
 
-    def initialize(type:, number:, balance:)
+    def initialize(type:, number:, balance:, tax: 0)
       @type = type
       @number = number
       @balance = balance
+      @tax = tax
       @errors = []
     end
 
