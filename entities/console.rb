@@ -19,55 +19,34 @@ module Entities
 
     def initialize
       @file_path = STORAGE_FILE
+      @context = Context.new(STORAGE_FILE)
+      @context.state = States::Initial.new(@context)
     end
 
     def run
-      puts I18n.t('run')
-      case read_input
-      when CREATE_ACCOUNT_COMMAND then create_account
-      when LOAD_ACCOUNT_COMMAND then load
-      else
-        exit
-      end
-    end
-
-    def create_account
-      load_accounts
       loop do
-        @current_account = Entities::Account.new(name: name_input, age: age_input, login: login_input, password: password_input, accounts: @accounts)
-        break if @current_account.validated?
-
-        @current_account.errors.each do |error|
-          puts error
-        end
+        @context.state.action
+        @context.state = @context.state.next
       end
-      @accounts << @current_account
-      save
-      main_menu
+    rescue ExitError
+      exit
     end
 
-    def load
-      load_accounts
-      loop do
-        if @accounts.empty?
-          return create_the_first_account
-        end
 
-        puts I18n.t('enter_login')
-        login = read_input
-        puts I18n.t('enter_password')
-        password = read_input
+    # def initialize
+    #   @file_path = STORAGE_FILE
+    # end
+    #
+    # def run
+    #   puts I18n.t('run')
+    #   case read_input
+    #   when CREATE_ACCOUNT_COMMAND then create_account
+    #   when LOAD_ACCOUNT_COMMAND then load
+    #   else
+    #     exit
+    #   end
+    # end
 
-        if @accounts.map { |account| { login: account.login, password: account.password } }.include?({ login: login, password: password })
-          @current_account = accounts.select { |account| login == account.login }.first
-          break
-        else
-          puts I18n.t('no_account')
-          next
-        end
-      end
-      main_menu
-    end
 
     def create_the_first_account
       puts I18n.t('no_active_accounts')
@@ -76,27 +55,6 @@ module Entities
       run
     end
 
-    def main_menu
-      loop do
-        puts I18n.t('menu', name: @current_account.name)
-        case read_input
-        when SHOW_CARDS_COMMAND then show_cards
-        when CREATE_CARD_COMMAND then create_card
-        when DELETE_CARD_COMMAND then destroy_card
-        when PUT_MONEY_COMMAND then put_money
-        when WITHDRAW_MONEY_COMMAND then withdraw_money
-        when SEND_MONEY_COMMAND then send_money
-        when DELETE_ACCOUNT_COMMAND
-          destroy_account
-          exit
-        when EXIT_COMMAND
-          exit
-          break
-        else
-          puts I18n.t('wrong_command')
-        end
-      end
-    end
 
     def create_card
       loop do
@@ -167,15 +125,6 @@ module Entities
       end
     end
 
-    def show_cards
-      if @current_account.card.any?
-        @current_account.card.each do |card|
-          puts "- #{card.number}, #{card.type}"
-        end
-      else
-        puts "There is no active cards!\n"
-      end
-    end
 
     def withdraw_money
       puts 'Choose the card for withdrawing:'
@@ -194,7 +143,7 @@ module Entities
               puts 'Input the amount of money you want to withdraw'
               a2 = read_input
               if a2.to_i > 0
-                money_left = current_card.balance - a2.to_i - withdraw_tax(current_card.type, current_card.balance, current_card.number, a2.to_i)
+                money_left = current_card.balance - a2.to_i - withdraw_tax(current_card.type, a2.to_i)
                 if money_left > 0
                   current_card.balance = money_left
                   @current_account.card[answer.to_i - 1] = current_card
@@ -208,7 +157,7 @@ module Entities
                   # end
                   # @accounts = new_accounts
                   save
-                  puts "Money #{a2.to_i} withdrawed from #{current_card.number}$. Money left: #{current_card.balance}$. Tax: #{withdraw_tax(current_card.type, current_card.balance, current_card.number, a2.to_i)}$"
+                  puts "Money #{a2.to_i} withdrawed from #{current_card.number}$. Money left: #{current_card.balance}$. Tax: #{withdraw_tax(current_card.type, a2.to_i)}$"
                   return
                 else
                   puts "You don't have enough money on card for such operation"
@@ -246,11 +195,11 @@ module Entities
               puts 'Input the amount of money you want to put on your card'
               a2 = read_input
               if a2.to_i > 0
-                if put_tax(current_card.type, current_card.balance, current_card.number, a2.to_i) >= a2.to_i
+                if put_tax(current_card.type, a2.to_i) >= a2.to_i
                   puts 'Your tax is higher than input amount'
                   return
                 else
-                  new_money_amount = current_card.balance + a2.to_i - put_tax(current_card.type, current_card.balance, current_card.number, a2.to_i)
+                  new_money_amount = current_card.balance + a2.to_i - put_tax(current_card.type, a2.to_i)
                   current_card.balance = new_money_amount
                   @current_account.card[answer.to_i - 1] = current_card
 
@@ -265,7 +214,7 @@ module Entities
                   # @accounts = new_accounts
 
                   save
-                  puts "Money #{a2.to_i} was put on #{current_card.number}. Balance: #{current_card.balance}. Tax: #{put_tax(current_card.type, current_card.balance, current_card.number, a2.to_i)}"
+                  puts "Money #{a2.to_i} was put on #{current_card.number}. Balance: #{current_card.balance}. Tax: #{put_tax(current_card.type, a2.to_i)}"
                   return
                 end
               else
@@ -323,12 +272,12 @@ module Entities
         puts 'Input the amount of money you want to withdraw'
         a3 = read_input
         if a3.to_i > 0
-          sender_balance = sender_card.balance - a3.to_i - sender_tax(sender_card.type, sender_card.balance, sender_card.number, a3.to_i)
-          recipient_balance = recipient_card.balance + a3.to_i - put_tax(recipient_card.type, recipient_card.balance, recipient_card.number, a3.to_i)
+          sender_balance = sender_card.balance - a3.to_i - sender_tax(sender_card.type, a3.to_i)
+          recipient_balance = recipient_card.balance + a3.to_i - put_tax(recipient_card.type, a3.to_i)
 
           if sender_balance < 0
             puts "You don't have enough money on card for such operation"
-          elsif put_tax(recipient_card.type, recipient_card.balance, recipient_card.number, a3.to_i) >= a3.to_i
+          elsif put_tax(recipient_card.type, a3.to_i) >= a3.to_i
             puts 'There is no enough money on sender card'
           else
             sender_card.balance = sender_balance
@@ -358,8 +307,8 @@ module Entities
             end
 
             File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
-            puts "Money #{a3.to_i}$ was put on #{sender_card.number}. Balance: #{recipient_balance}. Tax: #{put_tax(sender_card.type, sender_card.balance, sender_card.number, a3.to_i)}$\n"
-            puts "Money #{a3.to_i}$ was put on #{a2}. Balance: #{sender_balance}. Tax: #{sender_tax(sender_card.type, sender_card.balance, sender_card.number, a3.to_i)}$\n"
+            puts "Money #{a3.to_i}$ was put on #{sender_card.number}. Balance: #{recipient_balance}. Tax: #{put_tax(sender_card.type, a3.to_i)}$\n"
+            puts "Money #{a3.to_i}$ was put on #{a2}. Balance: #{sender_balance}. Tax: #{sender_tax(sender_card.type, a3.to_i)}$\n"
             break
           end
         else
@@ -381,66 +330,21 @@ module Entities
     end
 
     private
-    
+
     def save
       File.open(@file_path, 'w') { |f| f.write @accounts.to_yaml }
     end
 
-    def name_input
-      puts 'Enter your name'
-      read_input
+    def withdraw_tax(type, amount)
+      WithdrawTax.new(type).tax(amount)
     end
 
-    def login_input
-      puts 'Enter your login'
-      read_input
+    def put_tax(type, amount)
+      PutTax.new(type).tax(amount)
     end
 
-    def password_input
-      puts 'Enter your password'
-      read_input
-    end
-
-    def age_input
-      puts 'Enter your age'
-      read_input
-    end
-
-    def load_accounts
-      @accounts = File.exists?(@file_path) ? YAML.load_file(@file_path) : []
-    end
-
-    def withdraw_tax(type, balance, number, amount)
-      if type == 'usual'
-        return amount * 0.05
-      elsif type == 'capitalist'
-        return amount * 0.04
-      elsif type == 'virtual'
-        return amount * 0.88
-      end
-      0
-    end
-
-    def put_tax(type, balance, number, amount)
-      if type == 'usual'
-        return amount * 0.02
-      elsif type == 'capitalist'
-        return 10
-      elsif type == 'virtual'
-        return 1
-      end
-      0
-    end
-
-    def sender_tax(type, balance, number, amount)
-      if type == 'usual'
-        return 20
-      elsif type == 'capitalist'
-        return amount * 0.1
-      elsif type == 'virtual'
-        return 1
-      end
-      0
+    def sender_tax(type, amount)
+      SenderTax.new(type).tax(amount)
     end
 
     def read_input
