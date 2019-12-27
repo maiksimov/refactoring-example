@@ -1,25 +1,28 @@
 module States
   class CreateAccount < State
     def action
-      loop do
-        @context.current_account = Entities::Account.new(name: name_input,
-                                                         age: age_input,
-                                                         login: login_input,
-                                                         password: password_input,
-                                                         accounts: @context.accounts)
-        break if @context.current_account.validated?
-
+      @context.current_account = Entities::Account.new(name: name_input,
+                                                       age: age_input,
+                                                       login: login_input,
+                                                       password: password_input,
+                                                       accounts: @context.accounts)
+      unless @context.current_account.validated?
         @context.current_account.errors.each do |error|
           puts error
         end
+        return
       end
       @context.accounts << @context.current_account
       @context.save
     end
 
     def next
+      return CreateAccount.new(@context) unless @context.current_account.validated?
+
       AccountMenu.new(@context)
     end
+
+    private
 
     def name_input
       puts 'Enter your name'

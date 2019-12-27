@@ -1,5 +1,7 @@
 module States
-  class CreateAccount < State
+  class LoadAccount < State
+    AGREE_COMMAND = 'y'.freeze
+
     def action
       loop do
         if @context.accounts.empty?
