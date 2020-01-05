@@ -1,73 +1,63 @@
 module States
   class PutMoney < State
     def action
-      puts 'Choose the card for putting:'
+      puts I18n.t('choose_card')
 
-      if @context.current_account.card.any?
-        @context.current_account.card.each_with_index do |card, i|
-          puts "- #{card.number}, #{card.type}, press #{i + 1}"
-        end
-        puts "press `exit` to exit\n"
-        loop do
-          answer = read_input
-
-          if answer.to_i <= @context.current_account.card.length && answer.to_i > 0
-            current_card = @context.current_account.card[answer.to_i - 1]
-            loop do
-              puts 'Input the amount of money you want to put on your card'
-              a2 = read_input
-              if a2.to_i > 0
-                if put_tax(current_card.type, a2.to_i) >= a2.to_i
-                  puts 'Your tax is higher than input amount'
-                  return
-                else
-                  new_money_amount = current_card.balance + a2.to_i - put_tax(current_card.type, a2.to_i)
-                  current_card.balance = new_money_amount
-                  @context.current_account.card[answer.to_i - 1] = current_card
-
-                  # new_accounts = []
-                  # @accounts.each do |account|
-                  #   if account.login == @current_account.login
-                  #     new_accounts.push(@current_account)
-                  #   else
-                  #     new_accounts.push(account)
-                  #   end
-                  # end
-                  # @accounts = new_accounts
-
-                  @context.save
-                  puts "Money #{a2.to_i} was put on #{current_card.number}. Balance: #{current_card.balance}. Tax: #{put_tax(current_card.type, a2.to_i)}"
-                  return
-                end
-              else
-                puts 'You must input correct amount of money'
-                return
-              end
-            end
-          else
-            puts "You entered wrong number!\n"
-            return
-          end
-        end
-      else
-        puts "There is no active cards!\n"
+      if @context.current_account.card.empty?
+        puts I18n.t('no_active_cards')
+        return
       end
+
+      @context.current_account.card.each_with_index do |card, i|
+        puts I18n.t('select_card', card_number: card.number, card_type: card.type, index: (i + 1))
+      end
+
+      puts I18n.t('exit')
+
+      selected_card = read_input.to_i
+
+      unless selected_card <= @context.current_account.card.length && selected_card > 0
+        puts I18n.t('wrong_number')
+        return
+      end
+      selected_card -= 1
+
+      current_card = @context.current_account.card[selected_card]
+
+      puts I18n.t('put_amount')
+      input_amount = read_input.to_i
+
+      unless input_amount > 0
+        puts I18n.t('wrong_money_amount')
+        return
+      end
+
+      tax = put_tax(current_card.type, input_amount)
+
+      if tax >= input_amount
+        puts I18n.t('wrong_higher_tax')
+        return
+      end
+
+      new_money_amount = current_card.balance + input_amount - tax
+      current_card.balance = new_money_amount
+      @context.current_account.card[selected_card] = current_card
+      @context.save
+      puts I18n.t('put_stats',
+                  amount: input_amount,
+                  current_card: current_card.number,
+                  balance: current_card.balance,
+                  tax: tax)
     end
 
     def next
       AccountMenu.new(@context)
     end
 
-    def withdraw_tax(type, amount)
-      Entities::WithdrawTax.new(type).tax(amount)
-    end
+    private
 
     def put_tax(type, amount)
       Entities::PutTax.new(type).tax(amount)
-    end
-
-    def sender_tax(type, amount)
-      Entities::SenderTax.new(type).tax(amount)
     end
   end
 end

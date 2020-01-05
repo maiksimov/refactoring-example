@@ -1,11 +1,12 @@
 module States
   class DeleteCard < State
     AGREE_COMMAND = 'y'.freeze
+    MENU_STATE = 'menu'.freeze
 
     def action
-      if @context.current_account.card.any?
+      if @context.current_account.card.empty?
         puts I18n.t('no_active_cards')
-        return
+        return @next_state = MENU_STATE
       end
 
       puts I18n.t('delete_question')
@@ -30,8 +31,9 @@ module States
     end
 
     def next
-      return DeleteCard.new(@context) unless card_index_valid?(@selected_card_index)
-      AccountMenu.new(@context)
+      return AccountMenu.new(@context) if @next_state == MENU_STATE
+
+      DeleteCard.new(@context)
     end
 
     private

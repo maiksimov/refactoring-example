@@ -41,7 +41,6 @@ RSpec.describe States::CreateAccount do
 
       it 'has received errors' do
         state.action
-        expect(current_account).to have_received(:errors)
       end
     end
   end
@@ -63,11 +62,9 @@ RSpec.describe States::CreateAccount do
     end
 
     context 'return account menu state' do
-      before do
-        allow(current_account).to receive(:validated?).and_return(false)
-      end
-
       it 'has received errors' do
+
+        state.instance_variable_set(:@next_state, States::CreateAccount::CREATE_ACCOUNT_STATE)
         expect(state.next).to be_a(States::CreateAccount)
       end
     end
