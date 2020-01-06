@@ -12,20 +12,20 @@ RSpec.describe States::CreateCard do
   let(:context) { instance_double('Context') }
 
   describe 'next' do
-    context 'wrong card' do
+    context 'with wrong card' do
       before do
         state.instance_variable_set(:@wrong_card, true)
       end
 
-      it { expect(state.next).to be_a(described_class)}
+      it { expect(state.next).to be_a(described_class) }
     end
 
-    context ' card' do
+    context 'without wrong card' do
       before do
         state.instance_variable_set(:@wrong_card, nil)
       end
 
-      it { expect(state.next).to be_a(States::AccountMenu)}
+      it { expect(state.next).to be_a(States::AccountMenu) }
     end
   end
 
@@ -42,7 +42,7 @@ RSpec.describe States::CreateCard do
       expect(context).to have_received(:save)
     end
 
-    context 'has usual card' do
+    context 'when usual card' do
       before do
         allow(state).to receive(:read_input).and_return(USUAL_CARD)
       end
@@ -53,7 +53,7 @@ RSpec.describe States::CreateCard do
       end
     end
 
-    context 'has capitalist card' do
+    context 'when capitalist card' do
       before do
         allow(state).to receive(:read_input).and_return(CAPITALIST_CARD)
       end
@@ -64,7 +64,7 @@ RSpec.describe States::CreateCard do
       end
     end
 
-    context 'has virtual card' do
+    context 'when virtual card' do
       before do
         allow(state).to receive(:read_input).and_return(VIRTUAL_CARD)
       end
@@ -75,8 +75,9 @@ RSpec.describe States::CreateCard do
       end
     end
 
-    context 'wrong card' do
+    context 'when wrong card' do
       let(:wrong_card) { 'wrong' }
+
       before do
         allow(state).to receive(:read_input).and_return(wrong_card)
       end

@@ -7,10 +7,8 @@ module States
                                                        age: age_input,
                                                        login: login_input,
                                                        password: password_input)
-      if @errors.any?
-        @errors.each {|error| puts error }
-        return @next_state = CREATE_ACCOUNT_STATE
-      end
+      return if errors?
+
       @context.accounts << @context.current_account
       @context.save
     end
@@ -22,6 +20,14 @@ module States
     end
 
     private
+
+    def errors?
+      return false if @errors.empty?
+
+      @errors.each { |error| puts error }
+      @next_state = CREATE_ACCOUNT_STATE
+      true
+    end
 
     def name_input
       puts 'Enter your name'

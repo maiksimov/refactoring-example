@@ -10,6 +10,6 @@ class Context
   end
 
   def load_accounts
-    @accounts = File.exists?(@file_path) ? YAML.load_file(@file_path) : []
+    @accounts = File.exist?(@file_path) ? YAML.load_file(@file_path) : []
   end
 end

@@ -6,7 +6,7 @@ module Entities
       when CAPITALIST_TYPE then amount * 0.04
       when VIRTUAL_TYPE then amount * 0.88
       else
-      0
+        0
       end
     end
   end

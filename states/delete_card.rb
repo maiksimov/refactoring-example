@@ -4,30 +4,9 @@ module States
     MENU_STATE = 'menu'.freeze
 
     def action
-      if @context.current_account.card.empty?
-        puts I18n.t('no_active_cards')
-        return @next_state = MENU_STATE
-      end
+      return @next_state = MENU_STATE unless account_have_cards?(@context.current_account.card)
 
-      puts I18n.t('delete_question')
-      @context.current_account.card.each_with_index do |card, i|
-        puts I18n.t('select_card', card_number: card.number, card_type: card.type, index: (i + 1))
-      end
-      puts I18n.t('exit')
-      @selected_card_index = read_input.to_i
-
-      unless card_index_valid?(@selected_card_index)
-        puts I18n.t('wrong_number')
-        return
-      end
-
-      puts I18n.t('delete_card_question', card_number: @context.current_account.card[@selected_card_index - 1].number)
-      @answer = read_input
-
-      return unless @answer == AGREE_COMMAND
-
-      @context.current_account.card.delete_at(@selected_card_index - 1)
-      @context.save
+      select_card
     end
 
     def next
@@ -38,8 +17,24 @@ module States
 
     private
 
-    def card_index_valid?(selected_card_index)
-      selected_card_index <= @context.current_account.card.length && selected_card_index > 0
+    def select_card
+      print_cards(@context.current_account.card, I18n.t('delete_question'))
+      selected_card_index = read_input.to_i
+      return unless card_index_valid?(selected_card_index)
+
+      agree_to_delete_cart(selected_card_index)
+    end
+
+    def agree_to_delete_cart(selected_card_index)
+      puts I18n.t('delete_card_question', card_number: @context.current_account.card[selected_card_index - 1].number)
+      return unless read_input == AGREE_COMMAND
+
+      delete_cart(selected_card_index)
+      save_context
+    end
+
+    def delete_cart(selected_card_index)
+      @context.current_account.card.delete_at(selected_card_index - 1)
     end
   end
 end

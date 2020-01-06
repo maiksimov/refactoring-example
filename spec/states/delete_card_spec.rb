@@ -1,5 +1,4 @@
 RSpec.describe States::DeleteCard do
-
   let(:agree) { 'y' }
   let(:disagree) { 'n' }
   let(:state) { described_class.new(context) }
@@ -14,27 +13,28 @@ RSpec.describe States::DeleteCard do
   let(:current_account) { instance_double('Account', name: name, login: login, password: password, age: age, card: []) }
   let(:context) { instance_double('Context') }
   let(:cards) { [instance_double('Card', number: card_number, type: card_type)] }
-  let(:card_index) { 1 }
 
   describe 'next' do
-    context 'card valid' do
+    context 'when card valid' do
       before do
         allow(current_account).to receive(:card).and_return(cards)
         allow(context).to receive(:current_account).and_return(current_account)
       end
+
       it do
         state.instance_variable_set(:@next_state, States::DeleteCard::MENU_STATE)
         expect(state.next).to be_a(States::AccountMenu)
       end
     end
 
-    context 'card invalid' do
+    context 'when card invalid' do
       before do
         allow(context).to receive(:current_account).and_return(current_account)
       end
+
       it do
         state.instance_variable_set(:@selected_card_index, card_index)
-        expect(state.next).to be_a(States::DeleteCard)
+        expect(state.next).to be_a(described_class)
       end
     end
   end
@@ -42,12 +42,15 @@ RSpec.describe States::DeleteCard do
   describe 'action' do
     before do
       allow(context).to receive(:current_account).and_return(current_account)
-
     end
 
     context 'without cards' do
+      before do
+        allow(state).to receive(:account_have_cards?).and_return(false)
+      end
+
       it do
-        expect { state.action }.to output(/#{I18n.t('no_active_cards')}/).to_stdout
+        expect(state.action).to eq(States::DeleteCard::MENU_STATE)
       end
     end
 
@@ -59,7 +62,7 @@ RSpec.describe States::DeleteCard do
       end
 
       it do
-        expect { state.action }.to output(/#{ card_number}/).to_stdout
+        expect { state.action }.to output(/#{card_number}/).to_stdout
       end
 
       it do
@@ -75,7 +78,7 @@ RSpec.describe States::DeleteCard do
       end
 
       it do
-        expect { state.action }.to output(/#{I18n.t('wrong_number')}/).to_stdout
+        expect { state.action }.to output(/#{I18n.t('choose_correct_card')}/).to_stdout
       end
     end
   end

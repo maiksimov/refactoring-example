@@ -1,25 +1,15 @@
 module States
   class LoadAccount < State
-    AGREE_COMMAND = 'y'.freeze
-
     def action
       if @context.accounts.empty?
         puts I18n.t('no_active_accounts')
-        @answer = read_input
-        return
+        return @answer = read_input
       end
 
-      puts I18n.t('enter_login')
-      login = read_input
-      puts I18n.t('enter_password')
-      password = read_input
-
-      unless @context.accounts.map { |account| { login: account.login, password: account.password } }.include?({ login: login, password: password })
-        puts I18n.t('no_account')
-        return
-      end
-
-      @context.current_account = @context.accounts.select { |account| login == account.login }.first
+      login = read_login
+      password = read_password
+      @context.current_account = get_account(login, password)
+      puts I18n.t('no_account') if @context.current_account.nil?
     end
 
     def next
@@ -27,6 +17,22 @@ module States
       return Initial.new(@context) if @context.accounts.empty? && @answer != AGREE_COMMAND
 
       AccountMenu.new(@context)
+    end
+
+    private
+
+    def read_login
+      puts I18n.t('enter_login')
+      read_input
+    end
+
+    def read_password
+      puts I18n.t('enter_password')
+      read_input
+    end
+
+    def get_account(login, password)
+      @context.accounts.detect { |account| account.login == login && account.password == password }
     end
   end
 end

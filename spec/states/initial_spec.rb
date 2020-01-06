@@ -1,5 +1,4 @@
 RSpec.describe States::Initial do
-
   let(:context) { instance_double('Context', load_accounts: []) }
   let(:state) { described_class.new(context) }
 
@@ -9,5 +8,4 @@ RSpec.describe States::Initial do
       expect(context).to have_received(:load_accounts)
     end
   end
-
 end

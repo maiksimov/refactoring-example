@@ -1,0 +1,2 @@
+class WrongCardError < StandardError
+end

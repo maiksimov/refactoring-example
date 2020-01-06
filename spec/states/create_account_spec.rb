@@ -1,5 +1,4 @@
 RSpec.describe States::CreateAccount do
-
   let(:context) { instance_double('Context', accounts: []) }
   let(:state) { described_class.new(context) }
   let(:name) { 'John Doe' }
@@ -8,7 +7,7 @@ RSpec.describe States::CreateAccount do
   let(:age) { '32' }
   let(:current_account) { instance_double('Account', name: name, login: login, password: password, age: age) }
 
-  describe 'action' do
+  describe 'when action' do
     before do
       allow(state).to receive(:name_input).and_return(name)
       allow(state).to receive(:login_input).and_return(login)
@@ -51,21 +50,20 @@ RSpec.describe States::CreateAccount do
       state.instance_variable_set(:@context, context)
     end
 
-    context 'return create state' do
+    context 'when return AccountMenu state' do
       before do
         allow(current_account).to receive(:validated?).and_return(true)
       end
 
-      it 'has state' do
+      it do
         expect(state.next).to be_a(States::AccountMenu)
       end
     end
 
-    context 'return account menu state' do
+    context 'when next_state CreateAccount state' do
       it 'has received errors' do
-
         state.instance_variable_set(:@next_state, States::CreateAccount::CREATE_ACCOUNT_STATE)
-        expect(state.next).to be_a(States::CreateAccount)
+        expect(state.next).to be_a(described_class)
       end
     end
   end

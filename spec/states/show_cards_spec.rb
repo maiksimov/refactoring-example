@@ -1,5 +1,4 @@
 RSpec.describe States::ShowCards do
-
   let(:agree) { 'y' }
   let(:disagree) { 'n' }
   let(:state) { described_class.new(context) }
@@ -14,9 +13,8 @@ RSpec.describe States::ShowCards do
   let(:current_account) { instance_double('Account', name: name, login: login, password: password, age: age, card: []) }
   let(:context) { instance_double('Context') }
   let(:cards) { [instance_double('Card', number: card_number, type: card_type)] }
-  let(:card_index) { 1 }
 
-  describe 'action' do
+  describe 'when action' do
     before do
       allow(context).to receive(:current_account).and_return(current_account)
     end
@@ -33,9 +31,8 @@ RSpec.describe States::ShowCards do
       end
 
       it do
-        expect { state.action }.to output(/#{ card_number}/).to_stdout
+        expect { state.action }.to output(/#{card_number}/).to_stdout
       end
     end
-
   end
 end

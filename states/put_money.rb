@@ -2,52 +2,9 @@ module States
   class PutMoney < State
     def action
       puts I18n.t('choose_card')
+      return unless account_have_cards?(@context.current_account.card)
 
-      if @context.current_account.card.empty?
-        puts I18n.t('no_active_cards')
-        return
-      end
-
-      @context.current_account.card.each_with_index do |card, i|
-        puts I18n.t('select_card', card_number: card.number, card_type: card.type, index: (i + 1))
-      end
-
-      puts I18n.t('exit')
-
-      selected_card = read_input.to_i
-
-      unless selected_card <= @context.current_account.card.length && selected_card > 0
-        puts I18n.t('wrong_number')
-        return
-      end
-      selected_card -= 1
-
-      current_card = @context.current_account.card[selected_card]
-
-      puts I18n.t('put_amount')
-      input_amount = read_input.to_i
-
-      unless input_amount > 0
-        puts I18n.t('wrong_money_amount')
-        return
-      end
-
-      tax = put_tax(current_card.type, input_amount)
-
-      if tax >= input_amount
-        puts I18n.t('wrong_higher_tax')
-        return
-      end
-
-      new_money_amount = current_card.balance + input_amount - tax
-      current_card.balance = new_money_amount
-      @context.current_account.card[selected_card] = current_card
-      @context.save
-      puts I18n.t('put_stats',
-                  amount: input_amount,
-                  current_card: current_card.number,
-                  balance: current_card.balance,
-                  tax: tax)
+      select_card
     end
 
     def next
@@ -55,6 +12,40 @@ module States
     end
 
     private
+
+    def select_card
+      print_cards(@context.current_account.card, I18n.t('delete_question'))
+      selected_card_index = read_input.to_i
+      return unless card_index_valid?(selected_card_index)
+
+      selected_card_index -= 1
+      current_card = @context.current_account.card[selected_card_index]
+      read_amount(selected_card_index, current_card)
+    end
+
+    def read_amount(selected_card_index, current_card)
+      input_amount = read_input_with_title(I18n.t('put_amount')).to_i
+      return unless amount_valid?(input_amount)
+
+      read_tax(selected_card_index, current_card, input_amount)
+    end
+
+    def read_tax(selected_card_index, current_card, input_amount)
+      tax = put_tax(current_card.type, input_amount)
+      return unless tax_valid?(tax, input_amount)
+
+      current_card.balance = current_card.balance + input_amount - tax
+      @context.current_account.card[selected_card_index] = current_card
+      @context.save
+      put_stats(input_amount, current_card.number, current_card.balance, tax)
+    end
+
+    def tax_valid?(tax, amount)
+      return true if tax < amount
+
+      puts I18n.t('wrong_higher_tax')
+      false
+    end
 
     def put_tax(type, amount)
       Entities::PutTax.new(type).tax(amount)

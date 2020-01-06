@@ -13,15 +13,33 @@ class StateFactory
     case command
     when CREATE_ACCOUNT_COMMAND then States::CreateAccount.new(context)
     when LOAD_ACCOUNT_COMMAND then States::LoadAccount.new(context)
-    when DELETE_ACCOUNT_COMMAND then States::DeleteAccount.new(context)
+    else menu_state(command, context)
+    end
+  end
+
+  private
+
+  def menu_state(command, context)
+    return States::DeleteAccount.new(context) if command == DELETE_ACCOUNT_COMMAND
+
+    card_state(command, context)
+  end
+
+  def card_state(command, context)
+    case command
     when SHOW_CARDS_COMMAND then States::ShowCards.new(context)
     when CREATE_CARD_COMMAND then States::CreateCard.new(context)
     when DELETE_CARD_COMMAND then States::DeleteCard.new(context)
+    else money_operations_state(command, context)
+    end
+  end
+
+  def money_operations_state(command, context)
+    case command
     when PUT_MONEY_COMMAND then States::PutMoney.new(context)
     when WITHDRAW_MONEY_COMMAND then States::WithdrawMoney.new(context)
     when SEND_MONEY_COMMAND then States::SendMoney.new(context)
-    else
-      raise ExitError
+    else raise ExitError
     end
   end
 end
