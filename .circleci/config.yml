@@ -24,10 +24,10 @@ commands:
     steps:
       - run:
           name: rubocop
-          command: rubocop
+          command: bundle exec rubocop
       - run:
           name: fasterer
-          command: fasterer
+          command: bundle exec fasterer
 
   run_specs:
     steps:
