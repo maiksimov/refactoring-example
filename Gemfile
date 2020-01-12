@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
 gem 'i18n'
-gem 'rugged'
+gem 'rugged', '0.27.5'
 
 group :development do
   gem 'fasterer'
