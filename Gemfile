@@ -9,12 +9,14 @@ gem 'rugged', github: 'libgit2/rugged', ref: '233da19', submodules: true
 
 group :development do
   gem 'fasterer'
-  gem 'pry'
   gem 'rubocop'
   gem 'rubocop-rspec'
 end
 
 group :test do
+  gem 'fasterer'
+  gem 'rubocop'
+  gem 'rubocop-rspec'
   gem 'rspec', '~> 3.8'
   gem 'simplecov'
   gem 'simplecov-lcov'
