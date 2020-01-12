@@ -24,10 +24,10 @@ commands:
     steps:
       - run:
           name: rubocop
-          command: bundle exec rubocop
+          command: rubocop
       - run:
           name: fasterer
-          command: bundle exec fasterer
+          command: fasterer
 
   run_specs:
     steps:
@@ -50,6 +50,7 @@ commands:
             gem install bundler
             bundle config set path 'vendor/bundle'
       - run: sudo apt-get install cmake
+      - run: bundle install
       - save_cache:
           key: *bundle_cache
           paths:
