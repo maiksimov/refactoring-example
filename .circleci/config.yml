@@ -9,7 +9,7 @@ executors:
         environment:
           RAILS_ENV: test
 caches:
-  - &bundle_cache v1-repo-{{ checksum "Gemfile.lock" }}
+  - &bundle_cache v3-repo-{{ checksum "Gemfile.lock" }}
 
 commands:
   update_bundler:
@@ -48,6 +48,7 @@ commands:
           command: |
             gem update --system
             gem install bundler
+            bundle config set path 'vendor/bundle'
       - save_cache:
           key: *bundle_cache
           paths:
