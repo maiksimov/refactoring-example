@@ -17,6 +17,7 @@ commands:
       - run:
           name: install dependencies
           command: |
+	    apt-get install cmake
             gem update --system
             gem install bundler
   run_linters:
@@ -46,9 +47,10 @@ commands:
           key: *bundle_cache
       - run:
           command: |
+	    apt-get install cmake
             gem update --system
             gem install bundler
-            bundle install --path vendor/bundle
+            bundle config set path 'vendor/bundle'
       - save_cache:
           key: *bundle_cache
           paths:
