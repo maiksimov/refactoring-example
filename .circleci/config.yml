@@ -8,7 +8,6 @@ executors:
       - image: circleci/ruby:2.6.1
         environment:
           RAILS_ENV: test
-
 caches:
   - &bundle_cache v2-repo-{{ checksum "Gemfile.lock" }}
 
