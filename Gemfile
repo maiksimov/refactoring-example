@@ -9,7 +9,7 @@ gem 'i18n'
 group :test do
   gem 'fasterer'
   gem 'rspec'
-  gem 'rubocop'
+  gem 'rubocop', require: false
   gem 'rubocop-rspec'
-  gem 'simplecov'
+  gem 'simplecov', require: false
 end
