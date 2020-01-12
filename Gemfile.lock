@@ -11,8 +11,6 @@ GEM
       ruby_parser (~> 3.11.0)
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
-    imagen (0.1.5)
-      parser (>= 2.5, != 2.5.1.1)
     jaro_winkler (1.5.1)
     json (2.1.0)
     parallel (1.12.1)
@@ -48,18 +46,12 @@ GEM
     ruby-progressbar (1.10.0)
     ruby_parser (3.11.0)
       sexp_processor (~> 4.9)
-    rugged (0.27.5)
     sexp_processor (4.11.0)
     simplecov (0.16.1)
       docile (~> 1.1)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
-    simplecov-lcov (0.7.0)
-    undercover (0.2.1)
-      imagen (~> 0.1.5)
-      rainbow (~> 2.1)
-      rugged (~> 0.27.0)
     unicode-display_width (1.4.0)
 
 PLATFORMS
@@ -68,13 +60,10 @@ PLATFORMS
 DEPENDENCIES
   fasterer
   i18n
-  rspec (~> 3.8)
+  rspec
   rubocop
   rubocop-rspec
-  rugged (= 0.27.5)
   simplecov
-  simplecov-lcov
-  undercover
 
 BUNDLED WITH
    2.1.1
