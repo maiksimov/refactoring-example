@@ -49,7 +49,7 @@ commands:
             gem update --system
             gem install bundler
             bundle config set path 'vendor/bundle'
-      - run: sudo apt-get install ruby-full cmake
+      - run: sudo apt-get install cmake
       - run: bundle install
       - save_cache:
           key: *bundle_cache
