@@ -48,8 +48,6 @@ commands:
           command: |
             gem update --system
             gem install bundler
-            gem install rubocop
-            gem install fasterer
             bundle config set path 'vendor/bundle'
       - run: sudo apt-get install cmake
       - run: bundle install
