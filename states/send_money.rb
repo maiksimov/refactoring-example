@@ -16,7 +16,7 @@ module States
     def select_card_step
       print_cards(@context.current_account.card, I18n.t('delete_question'))
       selected_card_index = read_input.to_i
-      return unless card_index_valid?(selected_card_index)
+      return unless card_index_valid?(selected_card_index, @context)
 
       selected_card_index -= 1
       @sender_card = @context.current_account.card[selected_card_index]

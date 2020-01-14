@@ -19,7 +19,7 @@ module States
     def select_card
       print_cards(@context.current_account.card, I18n.t('delete_question'))
       selected_card_index = read_input.to_i
-      return unless card_index_valid?(selected_card_index)
+      return unless card_index_valid?(selected_card_index, @context)
 
       agree_to_delete_cart(selected_card_index)
     end
