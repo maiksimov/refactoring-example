@@ -1,6 +1,7 @@
 module States
   class State
     AGREE_COMMAND = 'y'.freeze
+    EXIT_COMMAND = 'exit'.freeze
 
     def initialize(context)
       @context = context
@@ -16,7 +17,7 @@ module States
 
     def read_input
       input = STDIN.gets.chomp
-      raise ExitError if input == 'exit'
+      raise ExitError if input == EXIT_COMMAND
 
       input
     end

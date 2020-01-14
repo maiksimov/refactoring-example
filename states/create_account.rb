@@ -1,6 +1,7 @@
 module States
   class CreateAccount < State
     CREATE_ACCOUNT_STATE = 'create'.freeze
+
     def action
       @errors = []
       @context.current_account = Entities::Account.new(name: name_input,
@@ -32,28 +33,26 @@ module States
     def name_input
       puts 'Enter your name'
       validator = Validators::Name.new(read_input)
-      validated_value(validator)
+      validated_value(validator, read_input)
     end
 
     def login_input
       puts 'Enter your login'
-      validator = Validators::Login.new(read_input, @context.accounts)
-      validated_value(validator)
+      validated_value(Validators::Login, read_input, @context.accounts)
     end
 
     def password_input
       puts 'Enter your password'
-      validator = Validators::Password.new(read_input)
-      validated_value(validator)
+      validated_value(Validators::Password, read_input)
     end
 
     def age_input
       puts 'Enter your age'
-      validator = Validators::Age.new(read_input)
-      validated_value(validator)
+      validated_value(Validators::Age, read_input)
     end
 
-    def validated_value(validator)
+    def validated_value(validator, *args)
+      validator = validator.new(args)
       @errors << validator.errors unless validator.validate?
       validator.value
     end

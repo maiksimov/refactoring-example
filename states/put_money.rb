@@ -4,7 +4,7 @@ module States
       puts I18n.t('choose_card')
       return unless account_have_cards?(@context.current_account.card)
 
-      select_card
+      select_card_step
     end
 
     def next
@@ -13,24 +13,24 @@ module States
 
     private
 
-    def select_card
+    def select_card_step
       print_cards(@context.current_account.card, I18n.t('delete_question'))
       selected_card_index = read_input.to_i
       return unless card_index_valid?(selected_card_index)
 
       selected_card_index -= 1
       current_card = @context.current_account.card[selected_card_index]
-      read_amount(selected_card_index, current_card)
+      read_amount_step(selected_card_index, current_card)
     end
 
-    def read_amount(selected_card_index, current_card)
+    def read_amount_step(selected_card_index, current_card)
       input_amount = read_input_with_title(I18n.t('put_amount')).to_i
       return unless amount_valid?(input_amount)
 
-      read_tax(selected_card_index, current_card, input_amount)
+      read_tax_step(selected_card_index, current_card, input_amount)
     end
 
-    def read_tax(selected_card_index, current_card, input_amount)
+    def read_tax_step(selected_card_index, current_card, input_amount)
       tax = put_tax(current_card.type, input_amount)
       return unless tax_valid?(tax, input_amount)
 

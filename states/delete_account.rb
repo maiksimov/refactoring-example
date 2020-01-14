@@ -1,9 +1,7 @@
 module States
   class DeleteAccount < State
-    AGREE_COMMAND = 'y'.freeze
-
     def action
-      puts 'Are you sure you want to destroy account?[y/n]'
+      puts I18n.t('destroy_account')
       @answer = read_input
       return unless @answer == AGREE_COMMAND
 

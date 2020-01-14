@@ -1,6 +1,5 @@
 module States
   class DeleteCard < State
-    AGREE_COMMAND = 'y'.freeze
     MENU_STATE = 'menu'.freeze
 
     def action

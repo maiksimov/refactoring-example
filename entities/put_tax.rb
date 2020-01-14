@@ -6,7 +6,7 @@ module Entities
       when CAPITALIST_TYPE then 10
       when VIRTUAL_TYPE then 1
       else
-        0
+        default_tax
       end
     end
   end
