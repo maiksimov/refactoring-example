@@ -8,7 +8,7 @@ RSpec.describe Validators::Password do
     let(:current_subject) { described_class.new(empty_password) }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 
@@ -16,7 +16,7 @@ RSpec.describe Validators::Password do
     let(:current_subject) { described_class.new(short_password) }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 
@@ -24,7 +24,7 @@ RSpec.describe Validators::Password do
     let(:current_subject) { described_class.new(long_password) }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 
@@ -32,7 +32,7 @@ RSpec.describe Validators::Password do
     let(:current_subject) { described_class.new(correct_password) }
 
     it do
-      expect(current_subject.validate?).to eq(true)
+      expect(current_subject.valid?).to eq(true)
     end
   end
 end

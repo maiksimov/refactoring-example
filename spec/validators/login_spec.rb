@@ -12,7 +12,7 @@ RSpec.describe Validators::Login do
     let(:login) { correct_login }
 
     it do
-      expect(current_subject.validate?).to eq(true)
+      expect(current_subject.valid?).to eq(true)
     end
   end
 
@@ -20,7 +20,7 @@ RSpec.describe Validators::Login do
     let(:login) { empty_login }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 
@@ -28,7 +28,7 @@ RSpec.describe Validators::Login do
     let(:login) { short_login }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 
@@ -36,7 +36,7 @@ RSpec.describe Validators::Login do
     let(:login) { long_login }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 
@@ -44,7 +44,7 @@ RSpec.describe Validators::Login do
     let(:login) { exists_login }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 end

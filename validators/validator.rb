@@ -8,7 +8,7 @@ module Validators
       @errors = []
     end
 
-    def validate?
+    def valid?
       @errors = []
       validate
       errors.empty?

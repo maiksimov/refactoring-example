@@ -53,7 +53,7 @@ module States
 
     def validated_value(validator, *args)
       validator = validator.new(args)
-      @errors << validator.errors unless validator.validate?
+      @errors << validator.errors unless validator.valid?
       validator.value
     end
   end

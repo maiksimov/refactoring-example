@@ -22,9 +22,24 @@ RSpec.describe States::SendMoney do
   let(:password) { '123456' }
   let(:wrong_password) { '1234567' }
   let(:age) { '32' }
-  # rubocop:disable Metrics/LineLength
-  let(:current_account) { instance_double('Account', name: name, login: login, password: password, age: age, card: []) }
-  let(:recipient) { instance_double('Account', name: another_name, login: another_login, password: password, age: age, card: []) }
+  let(:current_account) do
+    instance_double(
+        'Account',
+        name: name,
+        login: login,
+        password: password,
+        age: age,
+        card: [])
+  end
+  let(:recipient) do
+    instance_double(
+        'Account',
+        name: another_name,
+        login: another_login,
+        password: password,
+        age: age,
+        card: [])
+  end
   let(:context) { instance_double('Context', accounts: []) }
   let(:card_number) { '1234567812345678' }
   let(:recipient_card_number) { '4900567812345678' }
@@ -32,12 +47,13 @@ RSpec.describe States::SendMoney do
   let(:card_index) { 1 }
   let(:wrong_index) { 123 }
   let(:card) { instance_double('Card', number: card_number, type: card_type, balance: 100) }
-  let(:recipient_card) { instance_double('Card', number: recipient_card_number, type: card_type, balance: 0) }
+  let(:recipient_card) do
+    instance_double('Card', number: recipient_card_number, type: card_type, balance: 0)
+  end
   let(:cards) { [card] }
   let(:recipient_cards) { [recipient_card] }
   let(:right_tax) { 1 }
   let(:accounts) { [current_account, recipient] }
-  # rubocop:enable Metrics/LineLength
 
   describe 'next' do
     context 'when return menu state' do

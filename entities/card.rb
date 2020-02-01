@@ -12,7 +12,7 @@ module Entities
     private
 
     def generate_card_number
-      16.times.map { rand(10) }.join
+      Array.new(16) { rand(10) }
     end
   end
 end

@@ -6,7 +6,7 @@ RSpec.describe Validators::Name do
     let(:current_subject) { described_class.new(correct_name) }
 
     it do
-      expect(current_subject.validate?).to eq(true)
+      expect(current_subject.valid?).to eq(true)
     end
   end
 
@@ -14,7 +14,7 @@ RSpec.describe Validators::Name do
     let(:current_subject) { described_class.new(wrong_name) }
 
     it do
-      expect(current_subject.validate?).to eq(false)
+      expect(current_subject.valid?).to eq(false)
     end
   end
 end

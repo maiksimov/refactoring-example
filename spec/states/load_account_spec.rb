@@ -52,9 +52,7 @@ RSpec.describe States::LoadAccount do
 
     context 'with accounts' do
       before do
-        allow(context).to receive(:current_account)
-        allow(context).to receive(:current_account=).and_return(account)
-        allow(context).to receive(:accounts).and_return(accounts)
+        allow(context).to receive_messages(current_account: nil, 'current_account=': account, accounts: accounts)
         allow(state).to receive(:read_input).and_return(login, password)
       end
 
@@ -65,9 +63,7 @@ RSpec.describe States::LoadAccount do
 
     context 'with accounts, wrong credentials' do
       before do
-        allow(context).to receive(:current_account)
-        allow(context).to receive(:current_account=).and_return(account)
-        allow(context).to receive(:accounts).and_return(accounts)
+        allow(context).to receive_messages(current_account: nil, 'current_account=': account, accounts: accounts)
         allow(state).to receive(:read_input).and_return(login, wrong_password)
       end
 

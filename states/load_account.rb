@@ -9,7 +9,7 @@ module States
       login = read_login
       password = read_password
       @context.current_account = get_account(login, password)
-      puts I18n.t('no_account') if @context.current_account.nil?
+      puts I18n.t('no_account') unless @context.current_account
     end
 
     def next

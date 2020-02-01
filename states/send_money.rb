@@ -72,7 +72,7 @@ module States
     end
 
     def card_by_number(card_number)
-      @context.accounts.map(&:card).flatten.detect { |card| card.number == card_number }
+      @context.accounts.flat_map(&:card).detect { |card| card.number == card_number }
     end
 
     def card_exists?(card, card_number)

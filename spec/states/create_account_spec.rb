@@ -9,10 +9,8 @@ RSpec.describe States::CreateAccount do
 
   describe 'when action' do
     before do
-      allow(state).to receive(:name_input).and_return(name)
-      allow(state).to receive(:login_input).and_return(login)
-      allow(state).to receive(:password_input).and_return(password)
-      allow(state).to receive(:age_input).and_return(age)
+
+      allow(state).to receive_messages(name_input: name, login_input: login, password_input: password, age_input: age)
       allow(context).to receive(:current_account=).and_return(current_account)
       allow(context).to receive(:current_account).and_return(current_account)
       allow(context).to receive(:save)

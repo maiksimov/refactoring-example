@@ -3,6 +3,7 @@ module Entities
     USUAL_TYPE = 'usual'.freeze
     CAPITALIST_TYPE = 'capitalist'.freeze
     VIRTUAL_TYPE = 'virtual'.freeze
+    DEFAULT_TAX = 0
 
     def initialize(type)
       @type = type
@@ -13,7 +14,7 @@ module Entities
     end
 
     def default_tax
-      0
+      DEFAULT_TAX
     end
   end
 end
