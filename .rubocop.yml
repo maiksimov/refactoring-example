@@ -28,3 +28,9 @@ Documentation:
 
 FrozenStringLiteralComment:
   Enabled: false
+Security/YAMLLoad:
+  Enabled: false
+
+AllCops:
+  Exclude:
+    - 'spec/**/*.rb'

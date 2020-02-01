@@ -1,11 +1,11 @@
 require 'simplecov'
-require 'undercover'
 
 SimpleCov.start do
   add_filter(%r{\/spec\/})
+  add_filter(%r{\/bootstrap\/})
 end
 
-require_relative '../account'
+require_relative '../bootstrap/autoloader'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
